@@ -1,13 +1,14 @@
-#
-# Dockerfile
-#
-FROM alpine AS builder 
+FROM alpine:3.12.0 AS builder 
 RUN apk add build-base 
 WORKDIR /home
 COPY hello.c .
 RUN gcc "-DARCH=\"`uname -a`\"" hello.c -o hello
- 
-FROM alpine 
+
+LABEL   maintainer="Pascal Watteel" \
+        name="hello-multiarch" \
+        version="1.0"
+
+FROM alpine:3.12.0 
 WORKDIR /home
 COPY --from=builder /home/hello .
 ENTRYPOINT ["./hello"] 
