@@ -8,7 +8,7 @@
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/piwi3910/hello-multiarch/Build)
 
-![Docker Image Size (tag)](https://img.shields.io/docker/image-size/piwi3910/hello-multiarch/githubactions)
+![Docker Image Size (tag)](https://img.shields.io/docker/image-size/piwi3910/hello-multiarch/latest)
 
 ## Info
 
