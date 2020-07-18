@@ -9,7 +9,7 @@ env:
 
 install: []
 before_script:
-  - apt install qemu binfmt-support qemu-user-static -y
+  - sudo apt install qemu binfmt-support qemu-user-static -y
   - update-binfmts --display
   - docker buildx create --name mybuilder --platform linux/arm,linux/arm64,linux/amd64
   - docker buildx use mybuilder
