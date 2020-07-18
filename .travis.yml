@@ -1,5 +1,10 @@
 arch:
   - amd64
+os:
+  - linux
+
+language: ruby
+dist: xenial
 
 services:
   - docker
@@ -14,9 +19,7 @@ jobs:
   include:
     - stage: Build
       script: 
-        - docker build \
-          --pull \
-          --tag "${DOCKER_REPO}:${GIT_SHA}" .
+        - docker build --pull --tag "${DOCKER_REPO}:${GIT_SHA}" .
     - stage: Testing
       script:
         - docker run "${DOCKER_REPO}:${GIT_SHA}"
