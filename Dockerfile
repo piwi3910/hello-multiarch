@@ -1,5 +1,5 @@
 FROM alpine:3.12.0 AS builder 
-RUN apk add build-base 
+RUN apk add build-base --no-cache
 WORKDIR /home
 COPY hello.c .
 RUN gcc "-DARCH=\"`uname -a`\"" hello.c -o hello
