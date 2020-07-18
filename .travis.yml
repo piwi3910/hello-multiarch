@@ -20,16 +20,16 @@ jobs:
       script:
         - docker build --pull --tag "${DOCKER_REPO}:${GIT_SHA}" .
         - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin &> /dev/null
-        - docker tag "${DOCKER_REPO}:${GIT_SHA}" "${DOCKER_REPO}:testing"
-        - docker push "${DOCKER_REPO}:testing"
+        - docker push "${DOCKER_REPO}:${GIT_SHA}"
 
     - stage: Testing
       script:
-        - docker pull "${DOCKER_REPO}:testing"
-        - docker run "${DOCKER_REPO}:testing"
+        - docker pull "${DOCKER_REPO}:${GIT_SHA}"
+        - docker run "${DOCKER_REPO}:${GIT_SHA}"
 
     - stage: Publish
       script:
-        - docker pull "${DOCKER_REPO}:testing"
-        - docker tag "${DOCKER_REPO}:testing" "${DOCKER_REPO}:latest"
+        - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin &> /dev/null
+        - docker pull "${DOCKER_REPO}:${GIT_SHA}"
+        - docker tag "${DOCKER_REPO}:${GIT_SHA}" "${DOCKER_REPO}:latest"
         - docker push "${DOCKER_REPO}:latest"
