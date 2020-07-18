@@ -1,3 +1,7 @@
+arch:
+  - amd64
+  - arm64
+
 services:
   - docker
 
@@ -6,29 +10,25 @@ env:
     - DOCKER_REPO="piwi3910/hello-multiarch"
     - GIT_SHA="$(git rev-parse --short HEAD)"
 
+stages:
+  - build
+  - test
+  - deploy
+
 jobs:
   include:
-    - stage: Build
-      arch:
-        - amd64
-        - arm64
+    - stage: build
       script:
         - docker build --pull --tag "${DOCKER_REPO}:${GIT_SHA}" .
         - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin &> /dev/null
         - docker push "${DOCKER_REPO}:${GIT_SHA}"
 
-    - stage: Testing
-      arch:
-        - amd64
-        - arm64
+    - stage: test
       script:
         - docker pull "${DOCKER_REPO}:${GIT_SHA}"
         - docker run "${DOCKER_REPO}:${GIT_SHA}"
 
-    - stage: Publish
-      arch:
-        - amd64
-        - arm64
+    - stage: deploy
       script:
         - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin &> /dev/null
         - docker pull "${DOCKER_REPO}:${GIT_SHA}"
