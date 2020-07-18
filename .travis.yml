@@ -10,30 +10,9 @@ env:
     - DOCKER_REPO="piwi3910/hello-multiarch"
     - GIT_SHA="$(git rev-parse --short HEAD)"
 
-stages:
-  - build
-  - test
-  - deploy
-
-jobs:
-  include:
-    - stage: build
-      arch:
-        - amd64
-        - arm64
-      script:
-        - docker build --pull --tag "${DOCKER_REPO}:${GIT_SHA}" .
-        - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin &> /dev/null
-        - docker push "${DOCKER_REPO}:${GIT_SHA}"
-
-    - stage: test
-      script:
-        - docker pull "${DOCKER_REPO}:${GIT_SHA}"
-        - docker run "${DOCKER_REPO}:${GIT_SHA}"
-
-    - stage: deploy
-      script:
-        - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin &> /dev/null
-        - docker pull "${DOCKER_REPO}:${GIT_SHA}"
-        - docker tag "${DOCKER_REPO}:${GIT_SHA}" "${DOCKER_REPO}:latest"
-        - docker push "${DOCKER_REPO}:latest"
+script:
+  - docker build --pull --tag "${DOCKER_REPO}:${GIT_SHA}" .
+  - docker run "${DOCKER_REPO}:${GIT_SHA}"
+  - docker tag "${DOCKER_REPO}:${GIT_SHA}" "${DOCKER_REPO}:latest"
+  - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin &> /dev/null
+  - docker push "${DOCKER_REPO}:latest"
