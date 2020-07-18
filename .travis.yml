@@ -1,15 +1,28 @@
-dist: focal
-sudo: required
+arch:
+  - amd64
+
+service:
+  - docker
+
 env:
   global:
     - DOCKER_REPO=piwi3910/hello-multiarch
-before_install:
-  - curl -fsSL https://get.docker.com | sh
-  - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
-  - mkdir -p $HOME/.docker
-  - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
-  - sudo service docker start
-install:
-  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-  - docker buildx create --name xbuilder --use
-script: bash ci.sh
+    - GIT_SHA="$(git rev-parse --short HEAD)"
+    - TAG="${TRAVIS_TAG:-latest}"
+
+jobs:
+  include:
+    - stage: Build
+      script: 
+        - docker build \
+          --progress plain \
+          --tag "$DOCKER_REPO:$GIT_SHA" .
+    - stage: Testing
+      script:
+        - docker run "$DOCKER_REPO:$GIT_SHA"
+    - stage: Publish
+      script:
+        - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin &> /dev/null
+        - docker tag "$DOCKER_REPO:$GIT_SHA" "$DOCKER_REPO:$TAG"
+        - docker push "$DOCKER_REPO:$TAG"
+        - docker push "$DOCKER_REPO:$GIT_SHA"
