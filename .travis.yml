@@ -15,7 +15,7 @@ jobs:
     - stage: Build
       script: 
         - docker build \
-          --progress plain \
+          --pull \
           --tag "$DOCKER_REPO:$GIT_SHA" .
     - stage: Testing
       script:
