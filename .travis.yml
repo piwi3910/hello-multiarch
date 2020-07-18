@@ -18,6 +18,9 @@ stages:
 jobs:
   include:
     - stage: build
+      arch:
+        - amd64
+        - arm64
       script:
         - docker build --pull --tag "${DOCKER_REPO}:${GIT_SHA}" .
         - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin &> /dev/null
