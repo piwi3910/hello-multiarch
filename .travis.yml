@@ -1,29 +1,15 @@
-sudo: required
 dist: focal
-services:
-  - docker
-
+sudo: required
 env:
-  - IMAGE_NAME=piwi3910/hello-multiarch
-  - DOCKER_CLI_EXPERIMENTAL=enabled
-
-install: []
-before_script:
-  - sudo apt install qemu binfmt-support qemu-user-static -y
-  - update-binfmts --display
-  - docker buildx create --name mybuilder --platform linux/arm,linux/arm64,linux/amd64
-  - docker buildx use mybuilder
-  - docker buildx inspect --bootstrap
-script:
-  - docker buildx build --pull --tag "$IMAGE_NAME" .
-
-before_deploy:
-  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-  - git_sha="$(git rev-parse --short HEAD)"
-  - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:latest"
-  - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:${git_sha}"
-deploy:
-  provider: script
-  script: docker push "${IMAGE_NAME}:latest" && docker push "${IMAGE_NAME}:${git_sha}"
-  on:
-    branch: master
+  global:
+    - DOCKER_REPO=piwi3910/hello-multiarch
+before_install:
+  - curl -fsSL https://get.docker.com | sh
+  - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+  - mkdir -p $HOME/.docker
+  - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+  - sudo service docker start
+install:
+  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  - docker buildx create --name xbuilder --use
+script: bash ci.sh
