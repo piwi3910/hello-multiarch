@@ -1,15 +1,21 @@
-arch:
-  - amd64
-  - arm64
+sudo: required
+dist: focal
 services:
   - docker
 
 env:
   - IMAGE_NAME=piwi3910/hello-multiarch
+  - DOCKER_CLI_EXPERIMENTAL=enabled
 
 install: []
+before_script:
+  - apt install qemu binfmt-support qemu-user-static -y
+  - update-binfmts --display
+  - docker buildx create --name mybuilder --platform linux/arm,linux/arm64,linux/amd64
+  - docker buildx use mybuilder
+  - docker buildx inspect --bootstrap
 script:
-  - docker build --pull --tag "$IMAGE_NAME" .
+  - docker buildx build --pull --tag "$IMAGE_NAME" .
 
 before_deploy:
   - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
