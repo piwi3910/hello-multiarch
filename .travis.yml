@@ -13,19 +13,23 @@ env:
   global:
     - DOCKER_REPO="piwi3910/hello-multiarch"
     - GIT_SHA="$(git rev-parse --short HEAD)"
-    - TAG="${TRAVIS_TAG:-latest}"
 
 jobs:
   include:
     - stage: Build
-      script: 
+      script:
         - docker build --pull --tag "${DOCKER_REPO}:${GIT_SHA}" .
+        - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin &> /dev/null
+        - docker tag "${DOCKER_REPO}:${GIT_SHA}" "${DOCKER_REPO}:testing"
+        - docker push "${DOCKER_REPO}:testing"
+
     - stage: Testing
       script:
-        - docker run "${DOCKER_REPO}:${GIT_SHA}"
+        - docker pull "${DOCKER_REPO}:testing"
+        - docker run "${DOCKER_REPO}:testing"
+
     - stage: Publish
       script:
-        - echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin &> /dev/null
-        - docker tag "${DOCKER_REPO}:${GIT_SHA}" "${DOCKER_REPO}:{$TAG}"
-        - docker push "${DOCKER_REPO}:{$TAG}"
-        - docker push "${DOCKER_REPO}:${GIT_SHA}"
+        - docker pull "${DOCKER_REPO}:testing"
+        - docker tag "${DOCKER_REPO}:testing" "${DOCKER_REPO}:latest"
+        - docker push "${DOCKER_REPO}:latest"
