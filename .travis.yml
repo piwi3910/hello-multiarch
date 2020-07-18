@@ -17,6 +17,10 @@ env:
 
 jobs:
   include:
+    - os: linux
+      arch: amd64
+    - os: linux
+      arch: arm64
     - stage: Build
       script:
         - docker build --pull --tag "${DOCKER_REPO}:${GIT_SHA}" .
